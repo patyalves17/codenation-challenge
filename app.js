@@ -4,20 +4,22 @@ const fs = require('fs');
 const SHA1 = require("crypto-js/sha1");
 const CryptoJS = require("crypto-js");
 const FormData = require('form-data');
+const crypto = require('text-cryptography');
 
 
     axios.get(`https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=${token}`)
         .then(resp =>{
             
             fs.writeFileSync('answer.json',JSON.stringify(resp.data) );
-            resp.data.decifrado =  decrypt(resp.data);
+            let test =  decrypt(resp.data);
 
-            console.log(resp.data);
+            const caesar = new crypto.Caesar(resp.data.numero_casas);
+            resp.data.decifrado = caesar.decrypt(resp.data.cifrado); 
 
-            const ciphertext = SHA1(resp.data.decifrado);
-            const hashhertext = ciphertext.toString(CryptoJS.enc.Base64);
+            let ciphertext = CryptoJS.SHA1(resp.data.decifrado);
+            const hashhertext =ciphertext.toString(CryptoJS.enc.Hex);
             resp.data.resumo_criptografico = hashhertext;
-
+            
              fs.writeFileSync('answer.json',JSON.stringify(resp.data) )
             const formDataSend = new FormData();
             formDataSend.append('answer', fs.createReadStream('./answer.json'));

@@ -1,18 +1,35 @@
 const axios = require('axios');
 const token = require ('./token');
 const fs = require('fs');
-var SHA1 = require("crypto-js/sha1");
+const SHA1 = require("crypto-js/sha1");
+const CryptoJS = require("crypto-js");
+const FormData = require('form-data');
 
 
     axios.get(`https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=${token}`)
         .then(resp =>{
-            console.log(resp.data);
-            // fs.writeFileSync('answer.json',JSON.stringify(resp.data) )
+            
+            fs.writeFileSync('answer.json',JSON.stringify(resp.data) );
             resp.data.decifrado =  decrypt(resp.data);
-            console.log( resp.data);
-            // fs.writeFileSync('answer.json',JSON.stringify(resp.data) )
+
+            console.log(resp.data);
+
+            const ciphertext = SHA1(resp.data.decifrado);
+            const hashhertext = ciphertext.toString(CryptoJS.enc.Base64);
+            resp.data.resumo_criptografico = hashhertext;
+
+             fs.writeFileSync('answer.json',JSON.stringify(resp.data) )
+            const formDataSend = new FormData();
+            formDataSend.append('answer', fs.createReadStream('./answer.json'));
+
+            return axios.post(`https://api.codenation.dev/v1/challenge/dev-ps/submit-solution?token=${token}`, formDataSend, {
+                headers: {
+                    ...formDataSend.getHeaders()
+                } 
+            } );
             
-            
+        }).then(respPost=>{
+            console.log(respPost);
         })
         .catch(error =>{
             console.log(error);

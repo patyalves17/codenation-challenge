@@ -25,6 +25,7 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
-    "axios": "^0.19.2"
+    "axios": "^0.19.2",
+    "crypto-js": "^4.0.0"
   }
 }
